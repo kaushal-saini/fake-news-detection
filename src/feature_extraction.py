@@ -23,40 +23,52 @@ from pathlib import Path
 
 def create_tfidf_vectorizer(max_features=5000, min_df=5, max_df=0.7, ngram_range=(1, 2)):
     """
-    Create and configure a TF-IDF Vectorizer.
+    Create and configure a TF-IDF Vectorizer optimized for text classification.
     
-    Parameters:
-    -----------
+    TF-IDF (Term Frequency-Inverse Document Frequency) converts raw text into
+    numerical features that machine learning models can process. It emphasizes
+    words that are both frequent in a document AND rare across the corpus.
+    
+    Configuration Parameters:
+    ========================
     max_features : int (default=5000)
-        Maximum number of features (words) to keep
-        - Reduces dimensionality
-        - Improves performance
-        - Lower values = faster, less memory
+        Maximum number of features to extract from the vocabulary.
+        - Reduces dimensionality and training time
+        - Keeps only most discriminative words
+        - Trade-off: too low reduces model quality, too high increases memory
         
     min_df : int (default=5)
-        Minimum document frequency
-        - Ignore words appearing in less than 5 documents
-        - Removes rare, noisy words
+        Minimum document frequency - words appearing in fewer than 5 documents
+        are ignored. This filters out rare words that don't generalize well.
         
     max_df : float (default=0.7)
-        Maximum document frequency (as proportion)
-        - Ignore words appearing in more than 70% of documents
-        - Removes very common words that don't help classification
+        Maximum document frequency - words appearing in more than 70% of documents
+        are ignored. These common words (like "is", "the") don't discriminate
+        between fake and real news.
         
     ngram_range : tuple (default=(1, 2))
-        Range of n-grams to consider
-        - (1, 2): Consider both individual words (unigrams) and two-word phrases (bigrams)
-        - (1, 1): Only individual words
-        - (1, 3): Individual words, 2-word phrases, and 3-word phrases
+        Range of n-grams to consider:
+        - (1, 1): Only individual words (unigrams)
+        - (1, 2): Individual words + 2-word phrases (bigrams) - RECOMMENDED
+        - (1, 3): Individual + 2-word + 3-word phrases (slower, more features)
         
+    Why These Defaults?
+    ===================
+    - max_features=5000: Balance between quality and speed
+    - min_df=5: Filter noise while keeping valid terms
+    - max_df=0.7: Remove uninformative common words
+    - ngram_range=(1,2): Captures phrase context (e.g., "breaking news")
+    
     Returns:
     --------
     TfidfVectorizer
-        Configured vectorizer object
+        Configured vectorizer ready for fitting on training data
         
     Example:
     --------
     >>> vectorizer = create_tfidf_vectorizer(max_features=3000)
+    >>> X_train = vectorizer.fit_transform(train_texts)
+    >>> X_test = vectorizer.transform(test_texts)
     """
     print("Creating TF-IDF Vectorizer...")
     
