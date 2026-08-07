@@ -25,35 +25,73 @@ from sklearn.model_selection import train_test_split
 
 def train_model(X_train, y_train, random_state=42, max_iter=1000):
     """
-    Train a Logistic Regression model.
+    Train a Logistic Regression model for binary text classification.
+    
+    Logistic Regression is ideal for this task because:
+    ====================================================
+    1. INTERPRETABLE - Can see which words are important
+    2. FAST - Trains quickly and makes predictions in milliseconds
+    3. PROBABILISTIC - Provides confidence scores (0-1)
+    4. SCALABLE - Works well with sparse features (TF-IDF)
+    5. BASELINE - Excellent baseline for text classification
+    
+    How It Works:
+    =============
+    The model learns a linear boundary in feature space:
+    - Scores close to 0 → Likely FAKE news
+    - Scores close to 1 → Likely REAL news
+    - Uses sigmoid function to convert scores to probabilities
+    
+    Mathematical Foundation:
+    ========================
+    P(Real) = 1 / (1 + e^(-score))
+    
+    Where:
+    - score = weights · features + intercept
+    - weights learned during training
+    - features are TF-IDF vectors
     
     Parameters:
     -----------
     X_train : array-like or sparse matrix
-        Training features (TF-IDF vectors)
+        Training features (TF-IDF vectors from 5000 features)
+        Shape: (n_samples, 5000)
     y_train : array-like
-        Training labels (0 for fake, 1 for real)
+        Training labels (0=Fake, 1=Real)
+        Shape: (n_samples,)
     random_state : int (default=42)
         Random seed for reproducibility
+        - Ensures same results across runs
+        - Important for debugging and collaboration
     max_iter : int (default=1000)
-        Maximum number of iterations for convergence
+        Maximum iterations for optimization
+        - Usually converges in 50-200 iterations
+        - Increase if convergence warning appears
+        - 1000 is safe for most datasets
         
     Returns:
     --------
     LogisticRegression
-        Trained model
+        Trained model ready for predictions
+        
+    Attributes After Training:
+    --------------------------
+    model.coef_ : array, shape (1, n_features)
+        Learned weights for each feature
+        - Positive = pushes toward "Real"
+        - Negative = pushes toward "Fake"
+    
+    model.intercept_ : float
+        Bias term learned during training
+    
+    model.n_iter_ : int
+        Actual iterations needed to converge
         
     Example:
     --------
     >>> model = train_model(X_train, y_train)
-    
-    Explanation:
-    ---------
-    Logistic Regression:
-    - Uses sigmoid function to map features to probabilities
-    - Probability close to 0 = Fake news
-    - Probability close to 1 = Real news
-    - Threshold 0.5 is typically used (prob > 0.5 = Real)
+    >>> y_pred = model.predict(X_test)
+    >>> confidence = model.predict_proba(X_test)
     """
     print("Training Logistic Regression Model...")
     print("This may take a moment depending on dataset size...")
