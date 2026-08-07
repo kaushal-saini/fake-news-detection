@@ -158,13 +158,16 @@ def clean_text(text):
     """
     Complete text cleaning pipeline.
     
+    Implements a 6-step text normalization process optimized for news classification.
+    Each step is designed to reduce noise while preserving semantic meaning.
+    
     Steps:
-    1. Convert to lowercase
-    2. Remove URLs
-    3. Remove special characters
-    4. Remove extra whitespace
-    5. Remove stopwords
-    6. Lemmatization
+    1. Convert to lowercase - normalize case variations
+    2. Remove URLs - eliminate web links that don't contribute to classification
+    3. Remove special characters - keep only alphabetic content
+    4. Remove extra whitespace - normalize spacing
+    5. Remove stopwords - eliminate common, non-discriminative words
+    6. Lemmatization - convert words to base form for better feature matching
     
     Parameters:
     -----------
@@ -174,7 +177,13 @@ def clean_text(text):
     Returns:
     --------
     str
-        Cleaned text
+        Cleaned text ready for TF-IDF vectorization
+        
+    Example:
+    --------
+    >>> raw = "Check this URL: http://example.com!!! AMAZING news!!!"
+    >>> cleaned = clean_text(raw)
+    >>> print(cleaned)  # "check amazing news"
     """
     if not isinstance(text, str):
         return ""
