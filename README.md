@@ -595,4 +595,32 @@ For questions or issues:
 
 ---
 
+## Model Architecture
+
+### Classification Pipeline
+
+```
+Text Input
+    ↓
+[Preprocessing] → Normalize, clean, remove noise
+    ↓
+[Tokenization] → Split into words
+    ↓
+[TF-IDF] → Convert to numerical features (5000 dimensions)
+    ↓
+[Logistic Regression] → Binary classification
+    ↓
+Prediction: Fake (0) or Real (1)
+Confidence: 0-100%
+```
+
+### Performance Optimization
+
+- **Feature Reduction:** TF-IDF reduces 72k+ unique terms to 5000 most relevant
+- **Sparse Representation:** Memory-efficient sparse matrices for large datasets
+- **Fast Inference:** Single prediction takes <100ms
+- **Batch Processing:** Process multiple articles efficiently
+
+---
+
 **Ready to get started? Run `python main.py` to begin!** 🚀
