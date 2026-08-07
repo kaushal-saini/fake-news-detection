@@ -34,44 +34,81 @@ from sklearn.metrics import (
 
 def evaluate_model(y_true, y_pred):
     """
-    Evaluate model using all metrics.
+    Comprehensive model evaluation using standard classification metrics.
+    
+    This function calculates all important metrics for binary classification
+    to provide a complete picture of model performance. Use these metrics to
+    understand trade-offs between catching fake news and minimizing false alarms.
+    
+    Metrics Explained:
+    ==================
+    
+    Accuracy (Overall Correctness):
+    --------------------------------
+    Formula: (TP + TN) / Total
+    Interpretation: What percentage of predictions are correct?
+    When to Use: Good overview, but can be misleading with imbalanced data
+    
+    Precision (Fake Prediction Reliability):
+    ------------------------------------------
+    Formula: TP / (TP + FP)
+    Interpretation: Of the articles we marked as FAKE, how many are actually fake?
+    When to Use: Important when false alarms (marking real as fake) are costly
+    Example: 95% precision = 95 out of 100 "fake" predictions are correct
+    
+    Recall (Fake Detection Rate):
+    ------------------------------
+    Formula: TP / (TP + FN)
+    Interpretation: Of ALL actual fake articles, how many did we find?
+    When to Use: Important when missing fakes is costly (detection coverage)
+    Example: 96% recall = we catch 96 out of 100 actual fakes
+    
+    F1-Score (Balanced Metric):
+    ----------------------------
+    Formula: 2 × (Precision × Recall) / (Precision + Recall)
+    Interpretation: Harmonic mean - penalizes extreme values
+    When to Use: When precision and recall are equally important
+    Range: 0 to 1 (1.0 is perfect, 0 is worst)
+    
+    Confusion Matrix:
+    ------------------
+    Provides detailed breakdown:
+    - True Positives (TP): Correctly identified real news ✓
+    - True Negatives (TN): Correctly identified fake news ✓
+    - False Positives (FP): Real marked as fake ✗
+    - False Negatives (FN): Fake not detected ✗
+    
+    Performance Guidelines:
+    =======================
+    ✓ Excellent: All metrics > 90%
+    ✓ Good:      All metrics > 85%
+    ⚠ Fair:      Some metrics 70-85%
+    ✗ Poor:      Any metric < 70%
     
     Parameters:
     -----------
     y_true : array-like
-        True labels
+        True labels (0=Fake, 1=Real)
     y_pred : array-like
-        Predicted labels
+        Predicted labels (0=Fake, 1=Real)
         
     Returns:
     --------
     dict
-        Dictionary containing all metrics
+        Dictionary containing:
+        - accuracy: Overall correctness (0-1)
+        - precision: Fake prediction reliability (0-1)
+        - recall: Fake detection rate (0-1)
+        - f1_score: Balanced metric (0-1)
+        - confusion_matrix: 2D array [TN, FP; FN, TP]
+        - classification_report: Detailed per-class metrics
         
-    Metrics Explained:
-    ------------------
-    Accuracy: (TP + TN) / Total
-      - Overall correctness of predictions
-      - Simple but can be misleading with imbalanced data
-      
-    Precision: TP / (TP + FP)
-      - Of the news we predicted as fake, how many are actually fake?
-      - Important when false positives are costly
-      - "How trustworthy are our fake predictions?"
-      
-    Recall: TP / (TP + FN)
-      - Of all actual fake news, how many did we catch?
-      - Important when false negatives are costly
-      - "How many fakes do we find?"
-      
-    F1-Score: 2 * (Precision * Recall) / (Precision + Recall)
-      - Balanced combination of precision and recall
-      - Good when you care about both false positives and false negatives
-      
     Example:
     --------
     >>> metrics = evaluate_model(y_test, y_pred)
-    >>> print(metrics['accuracy'])
+    >>> print(f"Accuracy: {metrics['accuracy']:.2%}")  # 95.34%
+    >>> print(f"Precision: {metrics['precision']:.2%}") # 94.76%
+    >>> print(f"Recall: {metrics['recall']:.2%}")       # 95.98%
     """
     print("\nEvaluating Model Performance...")
     
