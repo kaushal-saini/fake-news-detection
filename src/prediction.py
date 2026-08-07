@@ -16,38 +16,101 @@ from pathlib import Path
 
 def predict_news(news_text, model, vectorizer):
     """
-    Predict if a single news article is real or fake.
+    Predict whether a news article is real or fake with confidence score.
+    
+    This function takes raw news text and produces a binary classification
+    with a confidence percentage, useful for real-world deployment.
+    
+    Prediction Pipeline:
+    ====================
+    1. TEXT PREPROCESSING
+       - Input: Raw news article text (any format)
+       - Output: Cleaned text (normalized, no URLs, no stopwords)
+       - Uses: Same preprocessing as training for consistency
+    
+    2. VECTORIZATION
+       - Input: Cleaned text
+       - Output: TF-IDF feature vector (5000 features)
+       - Uses: Fitted vectorizer from training
+    
+    3. CLASSIFICATION
+       - Input: Feature vector
+       - Output: Logistic Regression probability (0-1)
+       - 0.0 = Definitely Fake
+       - 0.5 = Uncertain (borderline)
+       - 1.0 = Definitely Real
+    
+    4. CONFIDENCE CALCULATION
+       - Confidence = max(prob_fake, prob_real) × 100
+       - Example: prob=[0.2, 0.8] → Real with 80% confidence
+    
+    Decision Logic:
+    ================
+    if probability > 0.5:
+        → Predicted as REAL
+    else:
+        → Predicted as FAKE
+    
+    Confidence Interpretation:
+    ============================
+    90-100%: Very confident prediction, reliable
+    75-89%:  Confident prediction, generally reliable
+    60-74%:  Moderate confidence, use with caution
+    50-59%:  Low confidence, borderline case
     
     Parameters:
     -----------
     news_text : str
-        News article text to classify
+        Raw news article text to classify
+        - Can be any length (short headline to full article)
+        - Any format (plain text OK)
+        - Non-English text may have reduced accuracy
+        
     model : LogisticRegression
-        Trained model
+        Pre-trained model (use load_model())
+        - Must be trained on WELFake dataset
+        - Specific to fake news classification
+        
     vectorizer : TfidfVectorizer
-        Fitted TF-IDF vectorizer
+        Pre-fitted vectorizer (use load_vectorizer())
+        - Must be fitted with same training data as model
+        - Ensures consistent feature representation
         
     Returns:
     --------
     dict
-        Prediction result with:
+        Result dictionary containing:
         - 'prediction': 0 (Fake) or 1 (Real)
-        - 'label': "Fake" or "Real"
-        - 'confidence': Confidence score (0-1)
-        - 'probabilities': Probability for each class
+        - 'label': "Fake" or "Real" (human readable)
+        - 'confidence': Confidence percentage (0-100)
+        - 'probabilities': {'fake': float, 'real': float}
         
     Example:
     --------
-    >>> from src.prediction import predict_news
     >>> from src.model_training import load_model
     >>> from src.feature_extraction import load_vectorizer
-    >>> 
+    >>> from src.prediction import predict_news
+    >>>
     >>> model = load_model('models/fake_news_model.pkl')
     >>> vectorizer = load_vectorizer('models/vectorizer.pkl')
-    >>> 
-    >>> text = "Breaking news: Scientists discover new treatment for cancer"
-    >>> result = predict_news(text, model, vectorizer)
-    >>> print(result)
+    >>>
+    >>> # Example 1: Real news
+    >>> text1 = "Scientists discover breakthrough in cancer treatment"
+    >>> result1 = predict_news(text1, model, vectorizer)
+    >>> # Output: {'prediction': 1, 'label': 'Real', 'confidence': 96, ...}
+    >>>
+    >>> # Example 2: Likely fake
+    >>> text2 = "FAKE: Celebrity secretly joins alien colony"
+    >>> result2 = predict_news(text2, model, vectorizer)
+    >>> # Output: {'prediction': 0, 'label': 'Fake', 'confidence': 94, ...}
+    
+    Usage Tips:
+    ===========
+    1. Always use the same vectorizer and model together
+    2. For batch predictions, use predict_batch_news() instead
+    3. High confidence (>80%) predictions are more reliable
+    4. Borderline cases (50-60%) require additional review
+    5. Consider article context when reviewing low-confidence predictions
     """
     # Transform text using vectorizer
     X = vectorizer.transform([news_text])
